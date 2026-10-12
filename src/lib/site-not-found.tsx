@@ -1,8 +1,6 @@
 import { Link } from '@tanstack/react-router'
 
-// Site-level not-found boundary. Separate from the admin `AdminNotFound`
-// (which needs Payload provider contexts and the forwarded RSC payload) —
-// this covers unmatched public routes with no data dependencies.
+// Site-level not-found boundary for unmatched public routes (distinct from the admin boundary).
 export function SiteNotFound() {
   return (
     <div style={{ fontFamily: 'system-ui, sans-serif', padding: '2rem' }}>

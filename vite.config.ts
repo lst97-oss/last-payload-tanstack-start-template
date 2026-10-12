@@ -1,5 +1,6 @@
 // @ts-nocheck — vendored Payload TanStack workaround plugins (see vendor/payload-tanstack-vite/README.md).
 
+import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import { reactStartRscVitePlugin } from '@tanstack/react-start-rsc/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
@@ -31,6 +32,21 @@ const projectPath = (relativePath: string) => `${projectDirectory}/${relativePat
 
 const PRIVATE_NO_STORE = { 'cache-control': 'private, no-store' }
 
+// Minimal hardening headers for admin + API surfaces. No CSP: Payload admin
+// ships inline scripts that a static policy would break. HSTS only in
+// production — dev runs over plain http://localhost.
+const PRIVATE_SECURITY_HEADERS =
+  Bun.env.NODE_ENV === 'production'
+    ? {
+        'referrer-policy': 'same-origin',
+        'strict-transport-security': 'max-age=31536000; includeSubDomains',
+        'x-content-type-options': 'nosniff',
+      }
+    : {
+        'referrer-policy': 'same-origin',
+        'x-content-type-options': 'nosniff',
+      }
+
 export default defineConfig({
   resolve: {
     alias: [
@@ -41,10 +57,6 @@ export default defineConfig({
       {
         find: '@payloadcms/ui/scss/app.scss',
         replacement: projectPath('./node_modules/@payloadcms/ui/dist/css/app.css'),
-      },
-      {
-        find: 'react/compiler-runtime',
-        replacement: projectPath('./vendor/react-compiler-runtime.ts'),
       },
       {
         find: 'sanitize-filename',
@@ -70,6 +82,7 @@ export default defineConfig({
     noExternal: payloadNoExternalPatterns,
   },
   plugins: [
+    tailwindcss(),
     clientModuleResolution(),
     wrapCjsForClient(),
     ssrStripDistStyleImports(),
@@ -92,14 +105,15 @@ export default defineConfig({
         server: { files: [] },
       },
     }),
-    viteReact(),
+    // React Compiler (OXC, client-only): annotation mode compiles only 'use memo' files.
+    viteReact({ compiler: { target: '19', compilationMode: 'annotation' } }),
     nitro({
       plugins: ['./src/plugins/payload-shutdown.ts'],
       preset: Bun.env.NITRO_PRESET ?? 'vercel',
       routeRules: {
-        '/admin/**': { headers: PRIVATE_NO_STORE },
-        '/_payload/**': { headers: PRIVATE_NO_STORE },
-        '/api/**': { headers: PRIVATE_NO_STORE },
+        '/admin/**': { headers: { ...PRIVATE_NO_STORE, ...PRIVATE_SECURITY_HEADERS } },
+        '/_payload/**': { headers: { ...PRIVATE_NO_STORE, ...PRIVATE_SECURITY_HEADERS } },
+        '/api/**': { headers: { ...PRIVATE_NO_STORE, ...PRIVATE_SECURITY_HEADERS } },
       },
     }),
   ],

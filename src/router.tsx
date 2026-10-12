@@ -2,6 +2,7 @@ import { payloadParseSearch, payloadStringifySearch } from '@payloadcms/tanstack
 import { createRouter as createTanStackRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { getContext } from '@/integrations/tanstack-query/root-provider'
+import { SiteError } from '@/lib/site-error'
 import { SiteNotFound } from '@/lib/site-not-found'
 import { routeTree } from '@/routeTree.gen'
 
@@ -11,6 +12,7 @@ export function getRouter() {
     routeTree,
     context,
     defaultNotFoundComponent: SiteNotFound,
+    defaultErrorComponent: SiteError,
     parseSearch: payloadParseSearch,
     stringifySearch: payloadStringifySearch,
   })
