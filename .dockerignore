@@ -38,4 +38,12 @@ __pycache__/
 *.pyc
 *.pyo
 todos.json
+*.log
+coverage/
+.turbo/
+tmp/
+.tmp/
+.vercel/
+.idea/
+pgdata/
 .cta.json
