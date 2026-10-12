@@ -1,5 +1,7 @@
 import type { NitroAppPlugin } from 'nitro/types'
 
+import { closeBusinessSql } from '@/server/db/business-sql'
+
 type Destroyable = { destroy?: () => unknown }
 
 function cachedPayloads(): unknown[] {
@@ -17,6 +19,11 @@ export async function destroyCachedPayloads(): Promise<PromiseSettledResult<unkn
   )
 }
 
+export async function drainAll(): Promise<PromiseSettledResult<unknown>[]> {
+  // allSettled: a failing business-client close never masks payload results.
+  return Promise.allSettled([destroyCachedPayloads(), closeBusinessSql()])
+}
+
 let shutdownArmed = false
 
 function armProcessHandlers(): void {
@@ -26,7 +33,7 @@ function armProcessHandlers(): void {
   shutdownArmed = true
   for (const signal of ['SIGINT', 'SIGTERM'] as const) {
     process.once(signal, () => {
-      void destroyCachedPayloads().finally(() => process.exit(0))
+      void drainAll().finally(() => process.exit(0))
     })
   }
 }
@@ -36,7 +43,7 @@ function armProcessHandlers(): void {
 // platform force-kills it, dropping in-flight work.
 const payloadShutdownPlugin: NitroAppPlugin = (nitroApp) => {
   armProcessHandlers()
-  nitroApp.hooks.hook('close', () => destroyCachedPayloads())
+  nitroApp.hooks.hook('close', () => drainAll())
 }
 
 export default payloadShutdownPlugin

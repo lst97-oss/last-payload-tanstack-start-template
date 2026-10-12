@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { destroyCachedPayloads } from '@/plugins/payload-shutdown'
+import { destroyCachedPayloads, drainAll } from '@/plugins/payload-shutdown'
 
 // Exercises the shipped drain against a fake globalThis._payload cache.
 // Signal traps and the Nitro `close` hook are wiring, covered by the live
@@ -43,5 +43,14 @@ describe('destroyCachedPayloads', () => {
     } finally {
       setPayloadCache(undefined)
     }
+  })
+})
+
+describe('drainAll', () => {
+  test('drains payload cache and business pool together', async () => {
+    setPayloadCache(undefined)
+    const results = await drainAll()
+    expect(results).toHaveLength(2)
+    expect(results.every((r) => r.status === 'fulfilled')).toBe(true)
   })
 })
