@@ -37,8 +37,6 @@ export function getAdminRenderIntent(intent: AdminRenderResult['intent']): Admin
   return { type: 'render' }
 }
 
-// Shared by both admin route loaders: converts the server render result into
-// a thrown redirect/notFound or the render payload.
 export function resolveAdminRenderResult(result: AdminRenderResult): AdminRenderResult {
   const intent = getAdminRenderIntent(result.intent)
   if (intent.type === 'redirect') {

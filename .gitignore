@@ -18,8 +18,8 @@ bun.lockb
 # Payload generated (regenerate via bun run generate:types / generate:importmap)
 payload-types.ts
 src/payload-import-map.ts
-# Docker / local data
-pgdata
+# Docker / local data (compose named volume; bind-mount dir if ever used)
+pgdata/
 # Python
 __pycache__/
 *.pyc
@@ -44,14 +44,7 @@ tmp/
 src/routeTree.gen.ts
 src/styles/payload-admin-generated.css
  
-# Env (keep .env.example tracked)
-.env.local
-.env.*.local
- 
 # OS/Editor
 Thumbs.db
 .idea/
 .vscode/
- 
-# Bun
-bun.lock

@@ -2,9 +2,6 @@ import configPromise from '@payload-config'
 import { createServerFn } from '@tanstack/react-start'
 import { buildAdminRenderParams } from '@/lib/payload/admin-route'
 
-// Renders an /admin subpath to HTML on the server via Payload's shared
-// renderRoot. Redirect/notFound surface as status intents the route loader
-// converts to TanStack navigation.
 export const adminRenderServerFn = createServerFn({ method: 'GET', strict: false })
   .validator((input: { segments: string[]; search: Record<string, string | string[]> }) => input)
   .handler(async ({ data }): Promise<unknown> => {
