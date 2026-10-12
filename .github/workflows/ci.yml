@@ -37,9 +37,10 @@ jobs:
           bun-version-file: .bun-version
       - run: bun install --frozen-lockfile
       # Regenerate gitignored files fresh checkouts lack (routeTree,
-      # payload import map) — typecheck and routes need them present.
+      # payload import map, admin CSS) — typecheck and tests need them.
       - run: bun run generate-routes
       - run: bun run generate:importmap
+      - run: bun run generate:payload-admin-css
       - run: bun run typecheck
       - run: bunx @biomejs/biome check .
       - run: bun run db:migrate
