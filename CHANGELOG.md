@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.3.0
+
+UI showcase, new shadcn components, and public styling isolated from Payload admin.
+
+### Added
+
+- Development-only `/ui` showcase with examples for all 55 installed UI modules, light/dark/system themes, and local interactive fixtures. Production requests return 404.
+- Page sidebar with desktop icon collapse, a mobile drawer, expandable section navigation, a workspace picker, and a fixture account menu.
+- Base Nova Code Block and Trace components, including copy actions, line numbers, diffs, syntax highlighting, and expandable activity output.
+- Lazy language loading with Shiki's JavaScript engine; an engine-free core import keeps highlighting compatible with Nitro builds.
+- Removal instructions for the showcase, plus CSS, control, and showcase regression checks.
+
+### Fixed
+
+- Tailwind layer order so public element defaults no longer override component utilities.
+- Public defaults and generated utilities scoped to `html[data-public-ui]`, preventing class collisions such as `.table` from changing Payload admin layouts. Public body-mounted popups remain styled.
+- Switch tracks scale with their thumbs; checked radio indicators fit and centre inside their controls.
+- Fresh-checkout CI regenerates the route tree, Payload import map, and admin CSS before checks; the lockfile supports frozen installs.
+
+### Upgrading
+
+- Run `bun install` after updating to install the highlighting dependencies.
+- Keep `data-public-ui` on custom public document shells and retain `withPayloadRoot` so Payload uses its separate document shell.
+- The showcase can be removed by following `src/features/ui-showcase/README.md`.
+- No database migrations are introduced in this release.
+
 ## v0.2.0
 
 Bare Payload v4 + TanStack Start, hardened to a boot contract.
