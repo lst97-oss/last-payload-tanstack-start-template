@@ -1,19 +1,27 @@
 /* Public-site Tailwind entry. shadcn CLI detection note: this file is the
    Tailwind v4 entry, equivalent to `@import "tailwindcss"` split into
-   granular theme + utilities imports so preflight stays out of the shared
+   granular theme import + scoped utilities so preflight stays out of the shared
    admin shell (a global reset would fight Payload's own element styling).
-   Add `@import "tailwindcss/preflight.css" layer(base);` back only if the
-   public site ever stops sharing the shell with admin.
+   The public document marker scopes the necessary element defaults below,
+   including portals, while Payload's own document shell stays outside them.
    Palette: DESIGN.md §4 semantic tokens. `@theme inline` keeps utilities
    referencing the vars (so `.dark` overrides apply); raw values live in
    `:root` / `.dark`. Token names align with shadcn for later reuse. */
+/* Keep Tailwind's layer order when omitting its global preflight import. */
+@layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/utilities.css" layer(utilities);
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Payload owns classes such as .table too; public utilities must not match them. */
+@layer utilities {
+  @scope (html[data-public-ui]) {
+    @tailwind utilities;
+  }
+}
 
 :root {
   --background: oklch(1 0 0);
@@ -167,13 +175,84 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
+  /* shadcn assumes these Tailwind element defaults. withPayloadRoot uses a
+     different <html> for admin, so this also covers public body portals. */
+  :where(html[data-public-ui]) {
     @apply font-sans;
+    line-height: 1.5;
+    -webkit-text-size-adjust: 100%;
+    tab-size: 4;
+    -webkit-tap-highlight-color: transparent;
+
+    &, & *, & ::before, & ::after, & ::backdrop, & ::file-selector-button {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border-width: 0;
+      border-style: solid;
+      @apply border-border outline-ring/50;
+    }
+
+    & body {
+      @apply bg-background text-foreground;
+    }
+
+    & :is(h1, h2, h3, h4, h5, h6) {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
+    & a {
+      color: inherit;
+      text-decoration: inherit;
+    }
+
+    & :is(ol, ul, menu) {
+      list-style: none;
+    }
+
+    & :is(button, input, select, optgroup, textarea), & ::file-selector-button {
+      font: inherit;
+      font-feature-settings: inherit;
+      font-variation-settings: inherit;
+      letter-spacing: inherit;
+      color: inherit;
+      border-radius: 0;
+      background-color: transparent;
+      opacity: 1;
+    }
+
+    & :is(button, input:where([type='button'], [type='reset'], [type='submit'])), & ::file-selector-button {
+      appearance: button;
+    }
+
+    & textarea {
+      resize: vertical;
+    }
+
+    & ::placeholder {
+      opacity: 1;
+      color: color-mix(in oklab, currentColor 50%, transparent);
+    }
+
+    & :is(img, svg, video, canvas, audio, iframe, embed, object) {
+      display: block;
+      vertical-align: middle;
+    }
+
+    & :is(img, video) {
+      max-width: 100%;
+      height: auto;
+    }
+
+    & table {
+      text-indent: 0;
+      border-color: inherit;
+      border-collapse: collapse;
+    }
+
+    & [hidden]:where(:not([hidden='until-found'])) {
+      display: none !important;
+    }
   }
 }
