@@ -2,6 +2,8 @@
 
 Bare Payload v4 + TanStack Start starter. Boots standalone: placeholder `/`, admin at `/admin`, REST at `/api/*`. Users-only auth, plain lexical editor, Postgres `push:false`.
 
+Development-only UI showcase: open `/ui` to exercise the installed shadcn components. Examples and removal instructions live in [src/features/ui-showcase](src/features/ui-showcase/README.md); production requests return 404.
+
 ## Quickstart
 
 ```bash
