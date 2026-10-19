@@ -20,7 +20,7 @@ Module map — `http/`: `errors.ts` (`HttpError`, `toHttpError`), `response.ts` 
 - One shared client: new modules reuse `getBusinessSql()` / `getBusinessDb()`; no per-module pools, env parsing, or migration runners (business tables never go through Payload `prodMigrations`).
 - Tests mirror the basename under `tests/`, inject fakes via deps params, never `mock.module`. TDD red → green per slice.
 - Do-not-"fix" seams: `getBusinessDb()` is callerless until the first table-backed module — keep it; `withAuth` is a 501 stub marking the Better Auth seam — don't call it; `health` is unauthenticated by design.
-- No Hono, no npm extraction (a second app promotes the kernel to a `packages/server-kit` workspace first).
+- No Hono, no CMS imports in the generic kernel files: CMS-only extras here are `env.ts` (extends the base env with `PAYLOAD_*` keys), `security/payload-server-url.ts` (Payload origin guard consumed by `payload.config.ts`), and the Payload drain in `src/plugins/payload-shutdown.ts`. The generic kernel files arrive via the kernel-sync workflow (see `scripts/kernel-sync.json`) — change the kernel in `last-tanstack-start-template` first, never hand-edit synced files.
 
 ## Conventions
 

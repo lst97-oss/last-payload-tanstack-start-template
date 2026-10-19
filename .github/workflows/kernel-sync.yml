@@ -1,0 +1,96 @@
+name: kernel-sync
+
+# Pulls the canonical business kernel (src/server/) from the blank template
+# (last-tanstack-start-template) into this repo. The blank repo is the source
+# of truth for every synced file; payload-only files (see
+# scripts/kernel-sync.json exclude) are never touched.
+#
+# Auth: cloning the blank repo and opening the PR both use the default
+# GITHUB_TOKEN, which works when both repos are public. If either repo ever
+# goes private, add a KERNEL_SYNC_TOKEN secret (classic PAT, repo scope) and
+# swap it into the checkout + create-pull-request steps.
+#
+# Mode is PR-by-default (review gate). To switch to direct push once syncs
+# are routinely green, replace the create-pull-request step with:
+#   - run: git push origin main
+# and grant the job contents: write (already granted below).
+
+on:
+  schedule:
+    # 20:00 UTC Sunday = 06:00 Monday Melbourne in AEST, 07:00 in AEDT.
+    # GitHub cron is UTC-only; the local time shifts by an hour with DST.
+    - cron: '0 20 * * 0'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Blank repo ref to sync from'
+        required: false
+        default: 'main'
+  repository_dispatch:
+    types: [kernel-update]
+
+concurrency:
+  group: kernel-sync
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: template_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/template_test
+      PAYLOAD_SECRET: ci-only-dummy-secret-override-at-runtime-1234567890
+      PAYLOAD_PUBLIC_SERVER_URL: https://example.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - run: bun install --frozen-lockfile
+      - name: Sync kernel from blank template
+        id: sync
+        run: |
+          REF="${{ inputs.ref }}"
+          if [ -z "$REF" ]; then REF="main"; fi
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            REF="${{ github.event.client_payload.ref }}"
+            if [ -z "$REF" ] || [ "$REF" = "null" ]; then REF="main"; fi
+          fi
+          echo "ref=$REF" >> "$GITHUB_OUTPUT"
+          bun scripts/kernel-sync.ts --ref "$REF" | tee /tmp/kernel-sync-summary.txt
+          {
+            echo ''
+            echo '---'
+            echo 'Automated kernel sync from `last-tanstack-start-template` (ref '"$REF"').'
+            echo 'Verification (typecheck, biome, migrate, tests) passed on this branch.'
+          } >> /tmp/kernel-sync-summary.txt
+      - run: bun run generate-routes
+      - run: bun run generate:importmap
+      - run: bun run generate:payload-admin-css
+      - run: bun run typecheck
+      - run: bunx @biomejs/biome check .
+      - run: bun run db:migrate
+      - run: bun test
+      - name: Open sync PR
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/kernel-sync
+          delete-branch: true
+          title: 'chore: sync kernel from blank@${{ steps.sync.outputs.ref }}'
+          body-path: /tmp/kernel-sync-summary.txt

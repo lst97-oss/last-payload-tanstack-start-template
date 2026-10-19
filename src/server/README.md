@@ -41,5 +41,5 @@ Copy the health slice layer by layer (`modules/health/` → `modules/<name>/`): 
 ## Deliberately not here (yet)
 
 - **No auth wrapper.** `withAuth` is a stub returning 501 — Better Auth session verification plugs in there when it lands.
-- **No npm package.** This kernel stays internal until a second app needs it; upstream template stays boot-only.
+- **Shared kernel, auto-synced.** The generic files here mirror the canonical kernel in `last-tanstack-start-template/src/server/` and arrive via the kernel-sync workflow (`scripts/kernel-sync.json`). CMS-only extras kept here: `env.ts` (`PAYLOAD_*` keys), `security/payload-server-url.ts`, and the Payload drain in `src/plugins/payload-shutdown.ts`. Change the kernel in the blank repo first — never hand-edit synced files.
 - **No Hono.** TanStack Start route handlers plus this kernel are the only HTTP layer.

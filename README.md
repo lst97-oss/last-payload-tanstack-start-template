@@ -33,6 +33,7 @@ First admin user: `bunx payload create-first-user` (Payload CLI), then sign in a
 | `db:up` | Start local Postgres (`compose.yaml`) matching `.env` |
 | `smoke` | Boot-contract check against a running server (`bun run smoke [baseUrl]`): `/` 200, `/admin` redirect, `/api/users/me`, `/api/live`, `/api/ready` |
 | `typecheck` | `bun check` (Bun 1.4.3+ native checker, ~90ms) |
+| `sync:kernel` | Pull canonical `src/server/` from the blank template (manifest in `scripts/kernel-sync.json`; CI runs this weekly and opens a PR) |
 
 ## Structure
 

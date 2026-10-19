@@ -1,6 +1,6 @@
 # Template Guidelines
 
-Bare Payload v4 (`4.0.0-canary.37`) + TanStack Start (RSC, Nitro). Keep it minimal: every file here must justify itself for boot (`/`, `/admin`, `/api/*`). App content (site pages, extra collections, chat/RAG/email/storage, seeds) belongs in the consuming project, not here.
+Bare Payload v4 (`4.0.0-beta.2`) + TanStack Start (RSC, Nitro). Keep it minimal: every file here must justify itself for boot (`/`, `/admin`, `/api/*`). App content (site pages, extra collections, chat/RAG/email/storage, seeds) belongs in the consuming project, not here.
 
 ## Load-bearing wiring — do not "simplify"
 
@@ -10,7 +10,7 @@ Bare Payload v4 (`4.0.0-canary.37`) + TanStack Start (RSC, Nitro). Keep it minim
 - `src/lib/payload/server-fns.ts` MUST return `handleServerFunctions` result as-is. Re-wrapping in `toSerializable` strips RSC elements (`$$typeof` is a Symbol) and hangs relationship drawers / form-state on a spinner.
 - `src/server/security/payload-server-url.ts` rejects loopback origins in production. The Docker build stage is production, so it exports a non-loopback `PAYLOAD_PUBLIC_SERVER_URL` for that one `RUN` layer only. Never relax the guard to make a build pass.
 - `payload.config.ts` uses `push: false` + `prodMigrations`. Schema changes go through committed migrations (`bunx payload migrate:create` → `bun run db:migrate`), never dev auto-push.
-- Admin CSS needs a real `<link>` (`src/routes/_payload.tsx` head + `scripts/assets/generate-payload-admin-css.ts` output). RSC-injected styles do not exist on first paint.
+- Admin CSS needs a real `<link>` (`src/routes/_payload.tsx` component-rendered link + `scripts/assets/generate-payload-admin-css.ts` output). RSC-injected styles do not exist on first paint.
 
 ## Conventions
 
@@ -29,4 +29,5 @@ Bare Payload v4 (`4.0.0-canary.37`) + TanStack Start (RSC, Nitro). Keep it minim
 - `bunx @biomejs/biome check .` clean; `biome lint src/server` clean; imports organized.
 - `bun run format` applied (formatter covers everything except `*.json`, `src/styles`, `src/migrations`, `vendor`, `routeTree.gen.ts`).
 - After route changes: `bun run generate-routes`, then `bun run dev` + `bun run smoke` — `/` 200, `/admin` login redirect, `/api/users/me` 200 `{"user":null}`, `/api/live` 200 live, `/api/ready` 200|503 with report.
+- Kernel files under `src/server/` (except `env.ts`, `security/payload-server-url.ts`, `AGENTS.md`, `README.md`) arrive via the kernel-sync workflow (`bun run sync:kernel`, manifest in `scripts/kernel-sync.json`) — never hand-edit them; change the blank repo first. The workflow opens a PR after a green verification gate.
 - Never read exit codes off pipelines (`cmd | tail; echo $?` reports `tail`). Capture first, read second.

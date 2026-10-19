@@ -1,0 +1,13 @@
+{
+  "$comment": "Kernel sync manifest: blank template (last-tanstack-start-template) is canonical for src/server/ code. The sync script copies source.dir -> target.dir minus exclude. Excluded: env.ts (payload extends the base env with PAYLOAD_* keys), security/payload-server-url.ts (payload-only guard), AGENTS.md + README.md (per-repo tailored docs; mirror manually only when the kernel contract changes). See scripts/kernel-sync.ts.",
+  "source": {
+    "repo": "https://github.com/lst97-oss/last-tanstack-start-template.git",
+    "ref": "main",
+    "dir": "src/server"
+  },
+  "target": {
+    "dir": "src/server"
+  },
+  "exclude": ["env.ts", "security/payload-server-url.ts", "AGENTS.md", "README.md"],
+  "allowDeletions": false
+}
