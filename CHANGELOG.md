@@ -1,5 +1,27 @@
 # Changelog
 
+## v0.4.0
+
+Payload 4.0.0-beta.2 migration, kernel auto-sync, and repo rename.
+
+### Changed
+
+- Repo renamed to `last-payload-tanstack-start-template` (package name, compose project, README title follow).
+- Upgraded `payload` and all `@payloadcms/*` deps from `4.0.0-canary.37` to `4.0.0-beta.2`.
+- Removed the `sharp` dependency and its `payload.config.ts` wiring; set beta-era flags (`authorship: false` on `users`, `llmInstructions: false`).
+- Refreshed the vendored TanStack Vite workarounds from beta.2 (`constants.js` split into `external.js` + `optimizeDeps.js`); plugin order unchanged.
+- Admin shell now uses the adapter's `payloadLayoutRoute()` helper instead of hand-rolled `RootProvider` wiring; `loadLayoutData` replaces `getLayoutData` + `toSerializable`. Deleted the local layout bridge (`src/lib/payload/layout.ts`) and its test.
+
+### Added
+
+- Kernel auto-sync: `src/server/` code pulls from the canonical blank template (`last-tanstack-start-template`) via the weekly `kernel-sync` workflow, which opens a PR after a green gate (`bun run sync:kernel` runs it locally).
+- Schema drift test (`tests/payload-schema.test.ts`): fails when the committed migration snapshot drifts from the sanitized config, no DB needed.
+
+### Upgrading
+
+- Run `bun install` after updating (Payload beta.2 + refreshed lockfile).
+- No database migrations are introduced in this release.
+
 ## v0.3.0
 
 UI showcase, new shadcn components, and public styling isolated from Payload admin.
