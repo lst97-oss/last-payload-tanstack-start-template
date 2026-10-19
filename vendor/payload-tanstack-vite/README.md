@@ -1,16 +1,14 @@
 # Vendored Payload TanStack Vite workarounds
 
-Copied verbatim from `@payloadcms/tanstack-start@4.0.0-internal.183b315`
-(`dist/vite/plugins/*` + `dist/vite/constants.js`) on 2026-09-21.
+Refreshed from `@payloadcms/tanstack-start@4.0.0-beta.2`
+(`dist/withPayload/workarounds/*`, `dist/withPayload/config/{external,optimizeDeps}.js`
+and `dist/withPayload/importProtection.js`) on 2026-10-18.
+`clientModuleResolution.js` retains the equivalent local Bun file/path APIs.
 
-Why vendored: the adapter's `exports` map only exposes `./vite` →
-`payloadPlugin`, which forces RSC mode (`@vitejs/plugin-rsc` +
-`reactStartRscVitePlugin`). On the installed TanStack Start 1.168 line that
-RSC path 404s every route (verified: baseline 200 → 404 with wrapper, 200
-again with only these four plugins). These four are the RSC-independent
-subset: `clientModuleResolution`, `wrapCjsForClient`,
-`ssrStripDistStyleImports`, `payloadDevTransforms` + shared constants.
+The full adapter wrapper previously made every route return 404 on this TanStack
+line. These workarounds preserve the proven plugin order and let Start own the
+RSC handler (`serverHandler: false`). Keep the wrapper out until `/admin` is
+verified to route correctly with it.
 
-Refresh: re-copy from the installed adapter version after any
-`@payloadcms/tanstack-start` bump; delete this directory once the full
-`payloadPlugin` wrapper routes correctly (then import `./vite` again).
+Refresh these files after each adapter upgrade. Remove them once the upstream
+wrapper is verified against the application's boot contract.

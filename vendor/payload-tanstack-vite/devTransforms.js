@@ -2,6 +2,17 @@
  * Dev-time transforms:
  * - Replaces `process.cwd()` with `"/"` in client code (non-SSR, non-prebundled)
  * - Injects Vite HMR + React Refresh preamble into SSR-rendered HTML (dev only)
+ *
+ * The preamble is injected just before `</head>`, *after* everything React
+ * renders into the head. React 19 treats `<meta>`/`<link>`/`<style>`/`<title>`
+ * as hoistable resources it matches by key (position-tolerant), but a
+ * non-hoistable inline `<script type="module">` placed *before* React's first
+ * rendered head node makes hydration position-match that script against a
+ * `<style>`/`<meta>` and throw — discarding the whole tree client-side, which
+ * aborts in-flight server-function fetches and intermittently breaks drawers,
+ * forms, and navigation. Appending after React's head content keeps the
+ * preamble out of that positional comparison while still running before the
+ * body's app-entry module.
  */ export function payloadDevTransforms() {
     const devScripts = `<script type="module" src="/@vite/client"></script>
 <script type="module">
@@ -27,9 +38,14 @@ window.__vite_plugin_react_preamble_installed__ = true
                         return chunk;
                     }
                     const str = typeof chunk === 'string' ? chunk : Buffer.isBuffer(chunk) ? chunk.toString() : chunk instanceof Uint8Array ? Buffer.from(chunk).toString() : null;
-                    if (str && str.includes('<head>')) {
+                    // Skip if a host already injected the preamble — a second copy breaks HMR.
+                    if (str && str.includes('__vite_plugin_react_preamble_installed__')) {
                         injected = true;
-                        return str.replace('<head>', `<head>${devScripts}`);
+                        return chunk;
+                    }
+                    if (str && str.includes('</head>')) {
+                        injected = true;
+                        return str.replace('</head>', `${devScripts}</head>`);
                     }
                     return chunk;
                 }
