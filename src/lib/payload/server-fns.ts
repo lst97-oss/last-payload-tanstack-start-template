@@ -1,6 +1,6 @@
 import configPromise from '@payload-config'
-import { getLayoutData } from '@payloadcms/tanstack-start/layouts'
-import { handleServerFunctions, toSerializable } from '@payloadcms/tanstack-start/server'
+import { loadLayoutData } from '@payloadcms/tanstack-start/layouts'
+import { handleServerFunctions } from '@payloadcms/tanstack-start/server'
 import { createServerFn } from '@tanstack/react-start'
 
 // Payload server functions shared by all admin routes — config + importMap
@@ -26,10 +26,7 @@ export const payloadServerFn = createServerFn({ method: 'POST', strict: false })
     return result
   })
 
-export const payloadLayoutServerFn = createServerFn({ method: 'GET', strict: false }).handler(
-  async (): Promise<unknown> => {
-    const { getPayloadImportMap } = await import('@/lib/payload/import-map')
-    const data = await getLayoutData({ configPromise, importMap: getPayloadImportMap() })
-    return toSerializable(data)
-  },
-)
+export const payloadLayoutServerFn = createServerFn({ method: 'GET', strict: false }).handler(async () => {
+  const { getPayloadImportMap } = await import('@/lib/payload/import-map')
+  return loadLayoutData({ config: await configPromise, importMap: getPayloadImportMap() })
+})
