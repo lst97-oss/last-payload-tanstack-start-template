@@ -1,4 +1,4 @@
-# payload-tanstack-start-template
+# last-payload-tanstack-start-template
 
 Bare Payload v4 + TanStack Start starter. Boots standalone: placeholder `/`, admin at `/admin`, REST at `/api/*`. Users-only auth, plain lexical editor, Postgres `push:false`.
 
