@@ -15,6 +15,7 @@
     "generate:importmap": "bunx ${PAYLOAD_BUNX_FLAGS:-} payload ${PAYLOAD_CLI_ARGS:-} generate:importmap",
     "db:migrate": "bunx payload migrate",
     "db:up": "docker compose up -d postgres",
+    "sync:kernel": "bun scripts/kernel-sync.ts",
     "typecheck": "bun check",
     "format": "bunx @biomejs/biome format --write .",
     "smoke": "bun scripts/smoke.ts",
