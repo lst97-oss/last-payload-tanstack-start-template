@@ -1,5 +1,3 @@
-// node:module is retained here because Bun has no native API exposing Node's
-// complete builtin module specifier list for Vite's client-import guard.
 import { builtinModules } from 'node:module';
 /**
  * Specifiers that must never appear in the client module graph. These are the
@@ -13,7 +11,7 @@ import { builtinModules } from 'node:module';
     /^@payloadcms\/richtext-lexical\/rsc/,
     /^@payloadcms\/richtext-slate\/rsc/,
     '@payloadcms/ui/server',
-    /^@payloadcms\/tanstack-start\/(layouts|rsc|server|views\/server)/,
+    /^@payloadcms\/tanstack-start\/(layouts|rsc|server)/,
     'sharp',
     'busboy',
     'croner',
@@ -32,7 +30,7 @@ import { builtinModules } from 'node:module';
  * to permit even when they appear to cross a server/client boundary.
  */ export function onImportProtectionViolation(violation) {
     const info = violation;
-    const allowedClientFileImporters = /\/richtext-lexical\/.*\/exports\/client\/|\/tanstack-start\/.*\/views\/AdminView|\/ui\//;
+    const allowedClientFileImporters = /\/richtext-lexical\/.*\/exports\/client\/|\/ui\//;
     if (info.envType === 'server' && info.resolved?.includes('.client.') && allowedClientFileImporters.test(info.importer)) {
         return false;
     }

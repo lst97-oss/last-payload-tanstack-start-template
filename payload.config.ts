@@ -1,7 +1,6 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
-import sharp from 'sharp'
 
 import { migrations } from '@/migrations'
 import { getServerEnv } from '@/server/env'
@@ -17,6 +16,7 @@ export default buildConfig({
   graphQL: {
     disable: true,
   },
+  llmInstructions: false,
   maxDepth: 5,
   serverURL: resolvePayloadServerUrl(env),
   admin: {
@@ -28,6 +28,7 @@ export default buildConfig({
   collections: [
     {
       slug: 'users',
+      authorship: false,
       auth: true,
       admin: {
         useAsTitle: 'email',
@@ -44,7 +45,6 @@ export default buildConfig({
   }),
   editor: lexicalEditor({}),
   secret: env.PAYLOAD_SECRET,
-  sharp,
   typescript: {
     outputFile: projectPath('./payload-types.ts'),
   },

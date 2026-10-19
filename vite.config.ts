@@ -8,18 +8,14 @@ import viteRsc from '@vitejs/plugin-rsc'
 import { nitro } from 'nitro/vite'
 import { defineConfig } from 'vite'
 import { clientModuleResolution } from '#vendor/payload-tanstack-vite/clientModuleResolution.js'
-import {
-  optimizeDepsExcludeDefaults,
-  optimizeDepsIncludeDefaults,
-  payloadNoExternalPatterns,
-  ssrExternalPackages,
-} from '#vendor/payload-tanstack-vite/constants.js'
 import { payloadDevTransforms } from '#vendor/payload-tanstack-vite/devTransforms.js'
+import { payloadNoExternalPatterns, ssrExternalPackages } from '#vendor/payload-tanstack-vite/external.js'
 import {
   defaultImportProtectionIgnoreImporters,
   onImportProtectionViolation,
   serverOnlyClientSpecifiers,
 } from '#vendor/payload-tanstack-vite/importProtection.js'
+import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from '#vendor/payload-tanstack-vite/optimizeDeps.js'
 import { reactDomServerInRsc } from '#vendor/payload-tanstack-vite/reactDomServerInRsc.js'
 import { ssrStripDistStyleImports } from '#vendor/payload-tanstack-vite/stripDistStyleImports.js'
 import { wrapCjsForClient } from '#vendor/payload-tanstack-vite/wrapCjsForClient.js'
