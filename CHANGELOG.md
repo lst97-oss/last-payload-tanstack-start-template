@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.4.1
+
+Bun 1.4.4 toolchain migration. No runtime or template behaviour changes.
+
+### Changed
+
+- Formatting moves to Bun's built-in formatter (`bun fmt`, config in `bunfig.toml`); Biome remains lint + import-assist only and its formatter is disabled.
+- Typechecking uses `bun check --no-script`; CI and the kernel-sync workflow now run the aggregate `bun run check`.
+- Bun is pinned to 1.4.4 in `.bun-version`, the Dockerfile `ARG`, and `bun-types`; the lockfile is refreshed.
+- One-time `bun fmt` formatting pass across TypeScript, TSX and CSS. JSON, Markdown, YAML and generated files are unchanged.
+
+### Upgrading
+
+- Run `bun install` after updating. Bun 1.4.4 or newer is required for the new scripts.
+- No database migrations or application changes are introduced in this release.
+
 ## v0.4.0
 
 Payload 4.0.0-beta.2 migration, kernel auto-sync, and repo rename.
