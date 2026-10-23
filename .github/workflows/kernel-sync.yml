@@ -78,13 +78,12 @@ jobs:
             echo ''
             echo '---'
             echo 'Automated kernel sync from `last-tanstack-start-template` (ref '"$REF"').'
-            echo 'Verification (typecheck, biome, migrate, tests) passed on this branch.'
+            echo 'Verification (format, lint, typecheck, migrate, tests) passed on this branch.'
           } >> /tmp/kernel-sync-summary.txt
       - run: bun run generate-routes
       - run: bun run generate:importmap
       - run: bun run generate:payload-admin-css
-      - run: bun run typecheck
-      - run: bunx @biomejs/biome check .
+      - run: bun run check
       - run: bun run db:migrate
       - run: bun test
       - name: Open sync PR

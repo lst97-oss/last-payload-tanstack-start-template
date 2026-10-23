@@ -32,7 +32,10 @@ First admin user: `bunx payload create-first-user` (Payload CLI), then sign in a
 | `db:migrate` | Apply committed migrations (`src/migrations/`) |
 | `db:up` | Start local Postgres (`compose.yaml`) matching `.env` |
 | `smoke` | Boot-contract check against a running server (`bun run smoke [baseUrl]`): `/` 200, `/admin` redirect, `/api/users/me`, `/api/live`, `/api/ready` |
-| `typecheck` | `bun check` (Bun 1.4.3+ native checker, ~90ms) |
+| `typecheck` | `bun check --no-script` (Bun 1.4.4+ native checker, ~100ms) |
+| `format` / `format:check` | `bun fmt` / `bun fmt --check` (Bun 1.4.4+; config in `bunfig.toml`) |
+| `lint` / `lint:fix` | Biome lint + import assist (formatter disabled) |
+| `check` | `format:check` → `lint` → `typecheck` (what CI runs) |
 | `sync:kernel` | Pull canonical `src/server/` from the blank template (manifest in `scripts/kernel-sync.json`; CI runs this weekly and opens a PR) |
 
 ## Structure
@@ -54,7 +57,7 @@ tests/                       unit suites per module + live users integration
 vendor/                      vendored RSC-independent Payload Vite plugins + 1 shim
 public/                      favicon.svg, robots.txt (admin/api disallowed)
 scripts/                     smoke.ts (boot-contract check), assets/ (admin CSS generator)
-.github/workflows/ci.yml     typecheck + biome + migrate + test + node-server build + smoke vs live server
+.github/workflows/ci.yml     format + lint + typecheck + migrate + test + node-server build + smoke vs live server
 .bun-version                 single Bun source (Dockerfile ARG + CI bun-version-file)
 ```
 
