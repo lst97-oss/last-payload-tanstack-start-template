@@ -26,10 +26,10 @@ First admin user: `bunx payload create-first-user` (Payload CLI), then sign in a
 | `dev` | Vite dev server on :3000 |
 | `build` | admin CSS → types → importmap → `vite build` (Dockerfile calls this chain; never repeat it elsewhere) |
 | `start` | Run Nitro output for the active preset (`scripts/start.ts`: `node-server` → `.output/server/index.mjs`, default `vercel` → `.vercel/output/functions/__server.func`) |
-| `generate:types` / `generate:importmap` | Regenerate `payload-types.ts` / `src/payload-import-map.ts` (both gitignored) |
+| `generate:types` / `generate:importmap` | Regenerate `src/payload/payload-types.ts` / `src/payload/payload-import-map.ts` (both gitignored) |
 | `generate-routes` | Regenerate `src/routeTree.gen.ts` after adding/removing route files |
-| `generate:payload-admin-css` | Regenerate `src/styles/payload-admin-generated.css` (runs inside `build`) |
-| `db:migrate` | Apply committed migrations (`src/migrations/`) |
+| `generate:payload-admin-css` | Regenerate `src/payload/styles/payload-admin-generated.css` (runs inside `build`) |
+| `db:migrate` | Apply committed migrations (`src/payload/migrations/`) |
 | `db:up` | Start local Postgres (`compose.yaml`) matching `.env` |
 | `smoke` | Boot-contract check against a running server (`bun run smoke [baseUrl]`): `/` 200, `/admin` redirect, `/api/users/me`, `/api/live`, `/api/ready` |
 | `typecheck` | `bun check --no-script` (Bun 1.4.4+ native checker, ~100ms) |
@@ -41,18 +41,24 @@ First admin user: `bunx payload create-first-user` (Payload CLI), then sign in a
 ## Structure
 
 ```
-payload.config.ts            users-only collections, postgres push:false, plain lexical
 compose.yaml                 local Postgres matching .env (bun run db:up)
 src/routes/                  __root (withPayloadRoot + ThemeProvider + Base-UI Toaster), index placeholder,
                              _payload (admin shell), _payload.admin.{index,$} (loaders),
                              api.live (liveness), api.ready (readiness), api.$ (REST catch-all)
 src/lib/                      site-not-found.tsx (defaultNotFoundComponent), site-error.tsx (defaultErrorComponent)
-src/lib/payload/             admin bridge: server-fns, admin-render, admin-route,
-                             layout, import-map, admin-not-found
-src/plugins/                payload-shutdown.ts (Nitro close hook + SIGINT/SIGTERM drain)
-src/server/                  env.ts (3 keys), security/payload-server-url.ts (prod guard),
+src/payload/                 Payload CMS: everything Payload-related lives here
+  payload.config.ts          users collection, postgres push:false + prodMigrations, plain lexical
+  collections/               one file per collection (users.ts), registered in payload.config.ts
+  components/                React components: payload-layout (admin shell)
+  lib/                       admin bridge: server-fns, admin-render, import-map
+  migrations/                20261011_initial-users-schema (users + payload internals)
+  security/                  payload-server-url.ts (prod origin guard, rejects loopback in production)
+  styles/                    admin CSS: generated sheet + theme
+  payload-shutdown.ts        Nitro close hook + SIGINT/SIGTERM drain
+  payload-types.ts           generated, gitignored
+  payload-import-map.ts      generated, gitignored
+src/server/                  env.ts (3 keys),
                              http/validation.ts (zod → 400, JSON body + query helpers), modules/health (live + ready)
-src/migrations/              20261011_initial-users-schema (users + payload internals)
 tests/                       unit suites per module + live users integration
 vendor/                      vendored RSC-independent Payload Vite plugins + 1 shim
 public/                      favicon.svg, robots.txt (admin/api disallowed)
@@ -76,7 +82,7 @@ bunx @tanstack/cli add tanstack-form
 
 List what's available first: `bunx @tanstack/cli create --list-add-ons`, details with `bunx @tanstack/cli create --addon-details <id>`. Add-ons drop files under `src/integrations/` (wired here via `src/router.tsx`, e.g. `tanstack-query/root-provider`) plus demo routes and deps.
 
-Caveat for this template: the CLI doesn't know about the Payload/Nitro wiring (`vite.config.ts` plugin order, `withPayloadRoot`, `payloadParseSearch`/`payloadStringifySearch`, `src/plugins/payload-shutdown.ts`). Review every file the add-on touches before accepting — keep the boot contract in AGENTS.md intact, then `bun run typecheck && bun test && bun run dev`.
+Caveat for this template: the CLI doesn't know about the Payload/Nitro wiring (`vite.config.ts` plugin order, `withPayloadRoot`, `payloadParseSearch`/`payloadStringifySearch`, `src/payload/payload-shutdown.ts`). Review every file the add-on touches before accepting — keep the boot contract in AGENTS.md intact, then `bun run typecheck && bun test && bun run dev`.
 
 Query needs no provider here: `setupRouterSsrQueryIntegration` in `src/router.tsx` already wraps the router with `QueryClientProvider`, so `useSuspenseQuery` works with zero provider code. Never add an explicit `QueryClientProvider` (double-wrap; only with `wrapQueryClient: false`).
 
@@ -139,13 +145,13 @@ bun run typecheck && bun test
 bun run dev               # check the new route renders
 ```
 
-Conventions: `@/` imports only (no `../`), server work goes in `createServerFn` handlers under `src/lib/` (see `src/lib/payload/server-fns.ts`), shared types in the same module. If the feature needs stored data, follow "Adding a collection" below instead of inventing a parallel store.
+Conventions: `@/` imports only (no `../`), server work goes in `createServerFn` handlers under `src/lib/` (see `src/payload/lib/server-fns.ts`), shared types in the same module. If the feature needs stored data, follow "Adding a collection" below instead of inventing a parallel store.
 
 ## Adding a collection
 
 Template stays users-only; this is the recipe consumers follow per collection:
 
-1. Add the collection to `payload.config.ts` `collections` (fields, `admin.useAsTitle`, `access` — local-API tests need `overrideAccess: true` unless the collection is public).
+1. Create `src/payload/collections/<name>.ts` and register it in `src/payload/payload.config.ts` `collections` (fields, `admin.useAsTitle`, `access` — local-API tests need `overrideAccess: true` unless the collection is public).
 2. Create the migration — never dev auto-push (`push: false`):
    ```bash
    bunx payload migrate:create   # then split value/type imports per AGENTS.md trap

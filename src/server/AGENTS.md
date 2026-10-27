@@ -2,7 +2,7 @@
 
 ## Role / pipeline position
 
-Business logic lives here, DDD-style, behind thin TanStack Start route adapters in `src/routes/api.*.ts` (routes extract data fns, wrap with `withContext`, never contain logic). Sibling `payload.config.ts` + `src/lib/payload/` own the CMS; this tree owns everything else.
+Business logic lives here, DDD-style, behind thin TanStack Start route adapters in `src/routes/api.*.ts` (routes extract data fns, wrap with `withContext`, never contain logic). Sibling `src/payload/` owns the CMS; this tree owns everything else.
 
 Module map — `http/`: `errors.ts` (`HttpError`, `toHttpError`), `response.ts` (`ok`/`fail` envelope), `with-context.ts` (requestId, logging, `withAuth` stub; passes through handler-built `Response`s), `validation.ts` (`parseWith` zod → 400 `VALIDATION_ERROR`); `observability/logger.ts` (structured console, sink-injectable); `db/business-sql.ts` (lazy Bun SQL + Drizzle seam); `config/business-env.ts` (lazy connection string); `env.ts` (required boot env, dual-runtime); `security/payload-server-url.ts` (loopback guard); `modules/<name>/{domain,application,infrastructure,http}` (one bounded context per dir; `health` is the reference slice: live liveness + ready readiness).
 
@@ -20,7 +20,7 @@ Module map — `http/`: `errors.ts` (`HttpError`, `toHttpError`), `response.ts` 
 - One shared client: new modules reuse `getBusinessSql()` / `getBusinessDb()`; no per-module pools, env parsing, or migration runners (business tables never go through Payload `prodMigrations`).
 - Tests mirror the basename under `tests/`, inject fakes via deps params, never `mock.module`. TDD red → green per slice.
 - Do-not-"fix" seams: `getBusinessDb()` is callerless until the first table-backed module — keep it; `withAuth` is a 501 stub marking the Better Auth seam — don't call it; `health` is unauthenticated by design.
-- No Hono, no CMS imports in the generic kernel files: CMS-only extras here are `env.ts` (extends the base env with `PAYLOAD_*` keys), `security/payload-server-url.ts` (Payload origin guard consumed by `payload.config.ts`), and the Payload drain in `src/plugins/payload-shutdown.ts`. The generic kernel files arrive via the kernel-sync workflow (see `scripts/kernel-sync.json`) — change the kernel in `last-tanstack-start-template` first, never hand-edit synced files.
+- No Hono, no CMS imports in the generic kernel files: CMS-only extras here are `env.ts` (extends the base env with `PAYLOAD_*` keys), and the Payload drain in `src/payload/payload-shutdown.ts`; the Payload origin guard lives in `src/payload/security/payload-server-url.ts`. The generic kernel files arrive via the kernel-sync workflow (see `scripts/kernel-sync.json`) — change the kernel in `last-tanstack-start-template` first, never hand-edit synced files.
 
 ## Conventions
 
