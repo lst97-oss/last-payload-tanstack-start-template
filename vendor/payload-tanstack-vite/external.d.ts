@@ -1,8 +1,4 @@
 /**
- * SSR/RSC externalization config used by `withPayload`. Kept separate from the
- * client optimizer config (`./optimizeDeps.ts`) so each concern stays small.
- */
-/**
  * Packages externalized during dev serve (`ssr.external`). Node's loader resolves
  * their CJS/UMD directly; letting Vite's dev SSR transform touch them can break
  * fragile UMD wrappers (e.g. `pluralize`, whose `this`-based global assignment
@@ -25,19 +21,13 @@ export declare const ssrExternalPackages: string[];
  * storage leaves don't, since their adapters are already `noExternal`.
  */
 export declare const buildBundledPackages: string[];
+/** Server-only package boundaries loaded directly by Node in development and production. */
+export declare const serverExternalPackages: string[];
+/** Additional installed packages that can bypass Vite's development server transforms. */
+export declare const devExternalPackages: string[];
 /**
- * External packages for the production `vite build` only (not dev serve).
- *
- * Externalizes the `@payloadcms/*` package boundaries — plus `payload` — so each
- * resolves its own transitive Node deps (`pino`, `drizzle-orm`, `libsql`, …) from
- * its own `node_modules` at runtime. Externalizing only the leaf deps breaks under
- * pnpm: a leaf imported by bundled code becomes an unresolvable bare specifier from
- * `dist/`, since pnpm does not hoist it; see {@link buildBundledPackages}.
- *
- * Kept out of dev's `ssr.external` on purpose: the monorepo resolves these to
- * TypeScript source (`.ts` imported via `.js` specifiers), which only Vite's
- * transform can resolve — an externalized copy would hit Node's raw resolver and
- * fail on the `.js`→`.ts` mismatch.
+ * Externalizes package boundaries so packages resolve their own transitive dependencies under pnpm.
+ * Leaves that must bundle in production are excluded; see {@link buildBundledPackages}.
  */
 export declare const buildExternalPackages: string[];
 export declare const payloadNoExternalPatterns: Array<RegExp | string>;
