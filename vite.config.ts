@@ -48,7 +48,7 @@ export default defineConfig({
     alias: [
       {
         find: '@payload-config',
-        replacement: projectPath('./payload.config.ts'),
+        replacement: projectPath('./src/payload/payload.config.ts'),
       },
       {
         find: '@payloadcms/ui/scss/app.scss',
@@ -104,7 +104,7 @@ export default defineConfig({
     // React Compiler (OXC, client-only): annotation mode compiles only 'use memo' files.
     viteReact({ compiler: { target: '19', compilationMode: 'annotation' } }),
     nitro({
-      plugins: ['./src/plugins/payload-shutdown.ts'],
+      plugins: ['./src/payload/payload-shutdown.ts'],
       preset: Bun.env.NITRO_PRESET ?? 'vercel',
       routeRules: {
         '/admin/**': { headers: { ...PRIVATE_NO_STORE, ...PRIVATE_SECURITY_HEADERS } },

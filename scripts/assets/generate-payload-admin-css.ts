@@ -1,5 +1,5 @@
 /**
- * Generate `src/styles/payload-admin-generated.css`: one relative `@import` per Payload
+ * Generate `src/payload/styles/payload-admin-generated.css`: one relative `@import` per Payload
  * admin stylesheet, so an admin document request carries a real <link> for the full
  * component CSS instead of relying on RSC-injected resources (which only exist after
  * client navigation).
@@ -20,18 +20,22 @@ const ROOTS = ['node_modules/@payloadcms/ui/dist', 'node_modules/@payloadcms/ric
  *
  * `css/app.css` is deliberately NOT skipped. It used to be excluded because
  * the client entry chunk loaded it for every public page; that import is gone
- * from `src/routes/_payload.tsx`, so the admin sheet is the only place it
+ * from `src/payload/components/payload-layout.tsx`, so the admin sheet is the only place it
  * needs to come from.
  */
 const SKIPPED: Record<string, true> = {
   'node_modules/@payloadcms/ui/dist/styles.css': true,
 }
 
-const OUTPUT = 'src/styles/payload-admin-generated.css'
+const OUTPUT = 'src/payload/styles/payload-admin-generated.css'
 
-/** `@import` specifiers must be relative: the vendored strip plugin nulls bare specifiers in `ssr`. */
+/**
+ * `@import` specifiers must be relative: the vendored strip plugin nulls bare specifiers in `ssr`.
+ * They resolve from OUTPUT's folder, so climb one `../` per directory level in OUTPUT.
+ */
 function toSpecifier(repoRelativePath: string): string {
-  return `../../${repoRelativePath}`
+  const depth = OUTPUT.split('/').length - 1
+  return `${'../'.repeat(depth)}${repoRelativePath}`
 }
 
 async function collect(): Promise<string[]> {

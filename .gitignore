@@ -16,8 +16,8 @@ todos.json
 bun.lockb
 *.tsbuildinfo
 # Payload generated (regenerate via bun run generate:types / generate:importmap)
-payload-types.ts
-src/payload-import-map.ts
+src/payload/payload-types.ts
+src/payload/payload-import-map.ts
 # Docker / local data (compose named volume; bind-mount dir if ever used)
 pgdata/
 # Python
@@ -42,7 +42,7 @@ tmp/
  
 # Generated (per AGENTS.md; do not commit)
 src/routeTree.gen.ts
-src/styles/payload-admin-generated.css
+src/payload/styles/payload-admin-generated.css
  
 # OS/Editor
 Thumbs.db

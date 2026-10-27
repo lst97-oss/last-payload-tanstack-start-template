@@ -29,10 +29,10 @@ COPY package.json bun.lock ./
 RUN --mount=type=cache,target=/root/.bun/install/cache,sharing=locked bun install --production --frozen-lockfile
 
 COPY --link --from=build --chown=bun:bun /app/.output ./.output
-COPY --link --chown=bun:bun payload.config.ts tsconfig.json ./
+COPY --link --chown=bun:bun tsconfig.json ./
 COPY --link --chown=bun:bun src ./src
-COPY --link --from=build --chown=bun:bun /app/src/payload-import-map.ts ./src/payload-import-map.ts
-COPY --link --from=build --chown=bun:bun /app/payload-types.ts ./payload-types.ts
+COPY --link --from=build --chown=bun:bun /app/src/payload/payload-import-map.ts ./src/payload/payload-import-map.ts
+COPY --link --from=build --chown=bun:bun /app/src/payload/payload-types.ts ./src/payload/payload-types.ts
 
 ENV HOST=0.0.0.0 \
     PORT=3000 \

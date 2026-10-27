@@ -9,8 +9,8 @@ test('Payload schema matches the latest migration without connecting to the data
     disableDBConnect: true,
     disableOnInit: true,
   })
-  const snapshots = [...new Bun.Glob('*.json').scanSync({ cwd: 'src/migrations' })].sort()
-  const snapshot = await Bun.file(`src/migrations/${snapshots.at(-1)}`).json()
+  const snapshots = [...new Bun.Glob('*.json').scanSync({ cwd: 'src/payload/migrations' })].sort()
+  const snapshot = await Bun.file(`src/payload/migrations/${snapshots.at(-1)}`).json()
   const { generateDrizzleJson, generateMigration } = payload.db.requireDrizzleKit()
   const current = await generateDrizzleJson(payload.db.schema)
 

@@ -14,7 +14,7 @@ ignorePatterns = [
   "**/*.toml",
   ".agents/",
   "vendor/",
-  "src/migrations/",
+  "src/payload/migrations/",
 ]
 
 # bun fmt applies singleQuote to CSS too; keep CSS/SCSS/Less strings double,

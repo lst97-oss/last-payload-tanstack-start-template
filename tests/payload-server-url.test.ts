@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { PayloadServerUrlError, resolvePayloadServerUrl } from '@/server/security/payload-server-url'
+import { PayloadServerUrlError, resolvePayloadServerUrl } from '@/payload/security/payload-server-url'
 import type { ServerEnv } from '@/server/env'
 
 function env(overrides: Partial<ServerEnv> = {}): ServerEnv {

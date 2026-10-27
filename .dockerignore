@@ -21,8 +21,8 @@ __unconfig*
 # Payload generated artefacts (regenerate via bunx payload generate:types /
 # generate:importmap) — the build stage regenerates them; the runner stage
 # copies the fresh files from the build stage instead of the host.
-payload-types.ts
-src/payload-import-map.ts
+src/payload/payload-types.ts
+src/payload/payload-import-map.ts
 
 # Dev / docs / test artefacts not needed at runtime.
 # NOTE: `vendor/` is intentionally NOT ignored — vite.config.ts and src/
