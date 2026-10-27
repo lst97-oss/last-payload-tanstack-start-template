@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.5.0
+
+Payload 4.0.0-beta.4 migration and consolidated `src/payload/` layout.
+
+### Changed
+
+- Upgraded `payload` and all `@payloadcms/*` packages from `4.0.0-beta.2` to `4.0.0-beta.4`; drizzle-orm, React 19.3.1, lucide-react, shadcn, zod and toolchain deps follow.
+- All Payload code now lives under `src/payload/`: config, `collections/`, `components/`, `lib/`, `migrations/`, `security/`, `styles/` and the shutdown hook. `@payload-config`, `migrationDir` and the generated type/import-map outputs point at the new paths; Docker, ignore files, Biome and `bun fmt` follow.
+- Admin routes use the adapter's `payloadAdminIndexRoute()` / `payloadAdminSplatRoute()` factories; the hand-rolled `admin-route` / `admin-not-found` bridge and its tests are gone.
+- Admin shell extracted to `src/payload/components/payload-layout.tsx` with the stylesheet link and admin style-cleanup effect unchanged.
+- `payloadServerFn` returns the Flight `Response` from `handleServerFunctions` untouched (beta.3+); the API catch-all imports `payloadApiHandlers` from `@payloadcms/tanstack-start/routes`.
+- Refreshed the vendored TanStack Start workarounds from beta.4: package externals now derive from `payload/build-config`, and import protection also guards `@payloadcms/tanstack-start/routes`.
+- The `users` collection is extracted to `src/payload/collections/users.ts` and registered from there.
+- Home page links to the dev-only `/ui` showcase instead of the toast demo button.
+
+### Upgrading
+
+- Run `bun install` after updating (Payload beta.4 + refreshed lockfile).
+- Payload files moved: update imports from `src/lib/payload/*` to `src/payload/lib/*`, and `@payload-config` now resolves to `src/payload/payload.config.ts`.
+- No database migrations are introduced in this release.
+
 ## v0.4.1
 
 Bun 1.4.4 toolchain migration. No runtime or template behaviour changes.
