@@ -1,5 +1,31 @@
 # Changelog
 
+## v0.5.1
+
+Structured logging, graceful shutdown, and Postgres 18 for local and CI.
+
+### Added
+
+- One structured logger for the process: `logger-format.ts` (pretty/JSON) and `logger-settings.ts` (`LOG_LEVEL`, `LOG_FORMAT`, `LOG_COLOR`), with an injectable `redact` policy and a single `writeLogLine` writer.
+- Payload's pino output is written through that logger (`payload-logger.ts`, wired through `buildConfig.logger`), so Payload lines use the server's settings and format.
+- Vite and Nitro dev output uses the same writer (`scripts/vite-logger.ts`, `customLogger`), so dev and production logs match.
+- `.env.example` documents the three logging settings.
+
+### Changed
+
+- `request.start` logs at `debug`; one `request.complete` line per request is the default output. Request loggers carry `component: 'http'`.
+- Dependencies: Vite 8.3.6, React 19.3.1, `@vitejs/plugin-react` 6.2.1, `@tanstack/router-cli` 1.168.0, `@types/node` 26.6.6, lucide-react 1.70.0, shadcn 4.23.0, shiki 4.6.0, zod 4.6.7; `consola` added for dev-tool log routing.
+
+### Fixed
+
+- Graceful shutdown: srvx stops accepting and waits for in-flight requests, then the Nitro `close` hook drains the Payload cache and business pool, logs `shutdown.*` events and exits. The SIGINT/SIGTERM trap that exited before in-flight requests finished is gone.
+- Dockerfile sets `SERVER_SHUTDOWN_TIMEOUT=10` and `STOPSIGNAL SIGTERM`; run the container with a stop timeout above 10s.
+
+### Upgrading
+
+- Local Postgres and CI use `postgres:18`. The 18 image sets `PGDATA=/var/lib/postgresql/18/docker` and declares `VOLUME /var/lib/postgresql`; `compose.yaml` mounts `pgdata:/var/lib/postgresql`. A volume created by 16.x is not upgraded in place — reset it (`docker compose down -v`) or run `pg_upgrade`.
+- CI actions move to `actions/checkout@v7` and `peter-evans/create-pull-request@v8`; `oven-sh/setup-bun@v2` already tracks the latest major.
+
 ## v0.5.0
 
 Payload 4.0.0-beta.4 migration and consolidated `src/payload/` layout.
