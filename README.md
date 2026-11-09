@@ -54,7 +54,7 @@ src/payload/                 Payload CMS: everything Payload-related lives here
   migrations/                20261011_initial-users-schema (users + payload internals)
   security/                  payload-server-url.ts (prod origin guard, rejects loopback in production)
   styles/                    admin CSS: generated sheet + theme
-  payload-shutdown.ts        Nitro close hook + SIGINT/SIGTERM drain
+  payload-shutdown.ts        Nitro close hook: drain, log, exit (srvx owns SIGINT/SIGTERM)
   payload-types.ts           generated, gitignored
   payload-import-map.ts      generated, gitignored
 src/server/                  env.ts (3 keys),
