@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:18
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: template_test
@@ -58,7 +58,7 @@ jobs:
       PAYLOAD_SECRET: ci-only-dummy-secret-override-at-runtime-1234567890
       PAYLOAD_PUBLIC_SERVER_URL: https://example.com
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: .bun-version
@@ -87,7 +87,7 @@ jobs:
       - run: bun run db:migrate
       - run: bun test
       - name: Open sync PR
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           branch: chore/kernel-sync
           delete-branch: true

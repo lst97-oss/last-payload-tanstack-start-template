@@ -1,10 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 
-import { destroyCachedPayloads, drainAll } from '@/payload/payload-shutdown'
+import { countFailures, destroyCachedPayloads, drainAll } from '@/payload/payload-shutdown'
 
 // Exercises the shipped drain against a fake globalThis._payload cache.
-// Signal traps and the Nitro `close` hook are wiring, covered by the live
-// SIGTERM proof (exit 0), not unit-testable here.
+// The Nitro `close` hook is wiring, covered by the live SIGTERM proof (shutdown.exit in the logs).
 function setPayloadCache(entries: [string, unknown][] | undefined) {
   if (entries === undefined) {
     delete (globalThis as Record<string, unknown>)._payload
@@ -52,5 +51,20 @@ describe('drainAll', () => {
     const results = await drainAll()
     expect(results).toHaveLength(2)
     expect(results.every((r) => r.status === 'fulfilled')).toBe(true)
+  })
+})
+
+describe('countFailures', () => {
+  test('counts rejections at the top level and inside the payload result list', () => {
+    const payloads = [
+      { status: 'fulfilled', value: undefined },
+      { status: 'rejected', reason: new Error('x') },
+    ]
+    const results = [
+      { status: 'fulfilled', value: payloads },
+      { status: 'rejected', reason: new Error('business') },
+    ] as PromiseSettledResult<unknown>[]
+    expect(countFailures(results)).toBe(2)
+    expect(countFailures([{ status: 'fulfilled', value: undefined }])).toBe(0)
   })
 })
